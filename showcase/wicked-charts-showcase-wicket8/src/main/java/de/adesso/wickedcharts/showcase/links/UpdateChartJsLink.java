@@ -15,7 +15,12 @@
 package de.adesso.wickedcharts.showcase.links;
 
 import de.adesso.wickedcharts.showcase.HomepageChartJs;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
@@ -23,7 +28,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  * Clicking on the link calls the onClick() method, which sets page
  * parameters accordingly.
  */
-public class UpdateChartJsLink extends Link<Void> {
+public class UpdateChartJsLink extends AjaxLink<Void> {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,12 +43,19 @@ public class UpdateChartJsLink extends Link<Void> {
     public UpdateChartJsLink(final String id, final String val) {
         super(id);
         this.chartVal = val;
+        this.add(new AttributeAppender("onclick", "history.pushState(null, null, '/chartjs/" + chartVal + "');history.replaceState(null, null, '/chartjs/\" + chartVal + \"')"));
+
     }
 
     @Override
-    public void onClick() {
+    public void onClick(AjaxRequestTarget target) {
         PageParameters params = new PageParameters();
         params.add("chart", chartVal);
-        setResponsePage(HomepageChartJs.class, params);
+        this.getWebPage().getPageParameters().add("chart", chartVal);
+        WebMarkupContainer newChart = ((HomepageChartJs)this.getPage()).createCharts(params);
+        this.getWebPage().remove("chartContainer");
+        this.getWebPage().add(newChart);
+        this.getWebPage().getPageParameters().clearNamed();
+        target.add(this.getWebPage());
     }
 }

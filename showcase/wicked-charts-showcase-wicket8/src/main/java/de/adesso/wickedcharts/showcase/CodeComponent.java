@@ -10,10 +10,9 @@ import org.apache.wicket.markup.html.panel.Panel;
  */
 public class CodeComponent extends Panel {
 
-    public CodeComponent(Chart chart)
+    public CodeComponent(ChartConfiguration chartConfig)
     {
         super("code");
-        ChartConfiguration chartConfig = chart.getChartConfiguration();
         Label codeContainer = new Label("code", new StringFromResourceModel(
                 chartConfig.getClass(), chartConfig.getClass().getSimpleName()
                 + ".java"));

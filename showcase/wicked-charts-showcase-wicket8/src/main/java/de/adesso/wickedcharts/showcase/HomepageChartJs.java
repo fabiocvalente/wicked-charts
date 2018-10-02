@@ -26,10 +26,10 @@ import de.adesso.wickedcharts.showcase.links.ChartjsShowcaseLink;
 import de.adesso.wickedcharts.showcase.links.HighchartsShowcaseLink;
 import de.adesso.wickedcharts.showcase.links.UpdateChartJsLink;
 import de.adesso.wickedcharts.wicket8.chartjs.Chart;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.request.mapper.parameter.INamedParameters;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.io.Serializable;
@@ -53,7 +53,8 @@ public class HomepageChartJs extends WebPage implements Serializable {
      * @param parameters the page parameters from the page URI
      */
     public HomepageChartJs(final PageParameters parameters) {
-        addCharts(parameters);
+        add(createCharts(parameters));
+        add(createCodeContainer(parameters));
         addNavigationLinks();
         addChartLinks();
     }
@@ -64,8 +65,9 @@ public class HomepageChartJs extends WebPage implements Serializable {
      * adds them to a Wicket ListView.
      * @param parameters the page parameters from the page URI
      */
-    private void addCharts(PageParameters parameters){
+    public WebMarkupContainer createCharts(PageParameters parameters){
 
+        WebMarkupContainer chartContainer = new WebMarkupContainer("chartContainer");
         List<Chart> charts = getChartFromParams(parameters);
 
         //If we have more than one chart - use SmallComponents
@@ -74,7 +76,7 @@ public class HomepageChartJs extends WebPage implements Serializable {
             for(Chart i : charts){
                 components.add(new SmallChartComponent(i));
             }
-            add( new ListView<SmallChartComponent>( "components", components ){
+            chartContainer.add( new ListView<SmallChartComponent>( "components", components ){
                 protected void populateItem(ListItem item)
                 {
                     item.add( (SmallChartComponent)item.getModelObject() );
@@ -85,24 +87,31 @@ public class HomepageChartJs extends WebPage implements Serializable {
             for (Chart i : charts) {
                 components.add(new ChartComponent(i));
             }
-            add( new ListView<ChartComponent>( "components", components ){
+            chartContainer.add( new ListView<ChartComponent>( "components", components ){
                 protected void populateItem(ListItem item)
                 {
                     item.add( (ChartComponent)item.getModelObject() );
                 }
             });
         }
+        chartContainer.setOutputMarkupId(true);
+        return chartContainer;
+    }
 
+    private WebMarkupContainer createCodeContainer(PageParameters pageParameters){
+        WebMarkupContainer codeContainer = new WebMarkupContainer("codeContainer");
         //Add Code Components
         List<CodeComponent> code_components = new ArrayList<>();
+        List<Chart> charts = getChartFromParams(pageParameters);
         for(Chart i : charts){
-            code_components.add(new CodeComponent(i));
+            code_components.add(new CodeComponent(i.getChartConfiguration()));
         }
-        add( new ListView<CodeComponent>( "code_components", code_components ){
+        codeContainer.add( new ListView<CodeComponent>( "code_components", code_components ){
             protected void populateItem(ListItem item){
                 item.add( (CodeComponent)item.getModelObject() );
             }
         });
+        return codeContainer;
     }
 
 	private void addNavigationLinks() {
